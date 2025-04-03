@@ -9,6 +9,9 @@
     # For making HTTP requests to external APIs (Market Data, FX, News)
     requests
 
+    # For running automated tests
+    pytest
+
     # Optional: For potential future database encryption (keep commented for now)
     # sqlcipher-python-wheels
 
