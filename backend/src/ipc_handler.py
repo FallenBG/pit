@@ -1,12 +1,12 @@
 # src/ipc_handler.py
-# *** UPDATED: Removed faulty argument count check ***
+# *** UPDATED: Explicit signature binding BEFORE function call ***
 
 import sys
 import json
 import logging
 import os
 from pathlib import Path
-# import inspect # No longer needed for basic arg check
+import inspect # Import inspect module
 
 # Setup basic logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - HANDLER - %(levelname)s - %(message)s', stream=sys.stderr)
@@ -33,8 +33,8 @@ except Exception as e:
 
 def main():
     """
-    Parses command line arguments, calls the requested database function,
-    and prints the result as JSON.
+    Parses command line arguments, validates arguments against function signature,
+    calls the requested database function, and prints the result as JSON.
     """
     if len(sys.argv) < 2:
         logging.error("No function name provided.")
@@ -44,6 +44,8 @@ def main():
     function_name = sys.argv[1]
     raw_args = sys.argv[2] if len(sys.argv) > 2 else '[]'
     args = []
+    error_message = None
+    result = None
 
     logging.debug(f"Received call for function: {function_name}")
     logging.debug(f"Raw arguments string: {raw_args}")
@@ -52,51 +54,67 @@ def main():
         args = json.loads(raw_args)
         if not isinstance(args, list): raise ValueError("Arguments must be provided as a JSON array.")
         logging.debug(f"Parsed arguments: {args}")
-    except (json.JSONDecodeError, ValueError) as e:
-            logging.exception("Argument parsing error.")
-            print(json.dumps({"error": f"Backend Error: Invalid arguments format for {function_name}. Details: {e}"}))
-            sys.exit(1)
 
-    result = None
-    error_message = None
-    try:
         target_function = getattr(database, function_name, None)
+
         if callable(target_function):
-            # *** Removed explicit argument count check ***
-            # Let Python handle argument errors during the call itself
-            logging.info(f"Calling database.{function_name} with args: {args}")
-            # Call the function with unpacked args; 'conn' will use its default (None)
-            result = target_function(*args)
-            logging.info(f"Result from database.{function_name}: {result}")
+            # === Explicit Signature Check ===
+            try:
+                sig = inspect.signature(target_function)
+                # We only bind the arguments passed via IPC, ignoring the optional 'conn' parameter
+                # Create a temporary signature excluding 'conn' for binding check
+                params_to_bind = {k: v for k, v in sig.parameters.items() if k != 'conn'}
+                temp_sig = inspect.Signature(parameters=params_to_bind.values())
+                # Attempt to bind the provided arguments from IPC
+                bound_args = temp_sig.bind(*args)
+                logging.debug(f"Arguments successfully bound to signature (excluding conn).")
+                # If binding succeeds, args are valid (in count/type) for the function call
+            except TypeError as e_bind:
+                # Binding failed - wrong number/type of args provided via IPC
+                logging.exception(f"Argument binding error for {function_name} with args {args}")
+                error_message = f"Backend Error calling {function_name}: Invalid arguments provided via IPC. Details: {e_bind}"
+                target_function = None # Prevent calling the function later
+            # === End Signature Check ===
+
+            # === Call Function (only if signature check passed) ===
+            if target_function and not error_message:
+                try:
+                    logging.info(f"Calling database.{function_name} with args: {args}")
+                    # Call the function - arguments should now be valid for the signature
+                    # The function will manage its own connection as 'conn' is not passed
+                    result = target_function(*args)
+                    logging.info(f"Result from database.{function_name}: {result}")
+                except Exception as e_exec:
+                    # Catch runtime errors *during* function execution (e.g., DB errors)
+                    logging.exception(f"Error executing function '{function_name}'")
+                    error_detail = str(e_exec)
+                    error_message = f"Backend Error executing {function_name}: {error_detail}"
         else:
             error_message = f"Backend Error: Unknown function '{function_name}'."
             logging.error(error_message)
 
-    except TypeError as e:
-        # Catch argument count errors (or other TypeErrors during call)
-        logging.exception(f"Type error executing function '{function_name}' with args {args}")
-        error_message = f"Backend Error executing {function_name}: Incorrect arguments provided or type mismatch. Details: {e}"
-    except Exception as e:
-        # Catch any other exceptions during function execution
-        logging.exception(f"Error executing function '{function_name}'")
-        # Attempt to get a more specific error message if available (e.g., from sqlite3)
-        error_detail = str(getattr(e, 'message', e)) # Get specific message if available
-        error_message = f"Backend Error executing {function_name}: {error_detail}"
+    except (json.JSONDecodeError, ValueError) as e:
+            logging.exception("Argument parsing error.")
+            error_message = f"Backend Error: Invalid arguments format for {function_name}. Details: {e}"
+    except Exception as e_outer:
+        # Catch any other unexpected errors
+        logging.exception(f"Unexpected outer error processing {function_name}")
+        error_message = f"Unexpected Backend Error processing {function_name}: {e_outer}"
 
-    # Prepare the JSON response
+    # Prepare and print JSON response
     response = {}
     if error_message:
         response["error"] = error_message
     else:
-        response["data"] = result # Wrap the actual result
-
-    # Print the JSON response to stdout
+        response["data"] = result
     try:
         print(json.dumps(response))
-    except TypeError as e:
+    except TypeError as e_serialize:
             logging.exception(f"Failed to serialize result for {function_name}")
-            print(json.dumps({"error": f"Backend Error: Result for {function_name} is not JSON serializable. Details: {e}"}))
+            # Try sending back just the error message if serialization failed
+            print(json.dumps({"error": f"Backend Error: Result for {function_name} is not JSON serializable. Details: {e_serialize}"}))
 
 
 if __name__ == "__main__":
     main()
+
