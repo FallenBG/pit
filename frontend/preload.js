@@ -1,20 +1,30 @@
-// Acts as a bridge between the sandboxed renderer and the main process.
+// 3. preload.js - Securely exposes specific Node.js/Electron APIs to the Renderer process
+    // *** UPDATED for IPC ***
 
-const { contextBridge, ipcRenderer } = require('electron');
+    const { contextBridge, ipcRenderer } = require('electron');
 
-console.log('Preload script loaded.');
+    console.log('Preload script loaded.');
 
-// Expose specific IPC functions to the renderer process
-// This is a safer way than enabling nodeIntegration
-contextBridge.exposeInMainWorld('electronAPI', {
-  // Example: Expose a function to send data to the main process
-  // sendData: (channel, data) => ipcRenderer.send(channel, data),
+    // Expose protected methods that allow the renderer process to use
+    // the ipcRenderer without exposing the entire object
+    contextBridge.exposeInMainWorld('electronAPI', {
+        // Settings
+        getSetting: (key) => ipcRenderer.invoke('db:get-setting', key),
+        setSetting: (key, value) => ipcRenderer.invoke('db:set-setting', key, value),
 
-  // Example: Expose a function to invoke an async action in the main process
-  // invokeAction: (channel, data) => ipcRenderer.invoke(channel, data),
+        // Assets
+        addAsset: (assetData) => ipcRenderer.invoke('db:add-asset', assetData),
+        getAllAssets: () => ipcRenderer.invoke('db:get-all-assets'),
+        // getAssetByTicker: (ticker) => ipcRenderer.invoke('db:get-asset-by-ticker', ticker), // Example for later
+        // getAssetById: (id) => ipcRenderer.invoke('db:get-asset-by-id', id), // Example for later
 
-  // Add other functions you need to expose here (e.g., for file system access via main process)
-  // Be very selective about what you expose for security reasons.
-  // Example: Requesting file open dialog
-  // openFile: () => ipcRenderer.invoke('dialog:openFile')
-});
+        // Transactions
+        addTransaction: (txData) => ipcRenderer.invoke('db:add-transaction', txData),
+        getAllTransactions: () => ipcRenderer.invoke('db:get-all-transactions'),
+        // getTransactionsForAsset: (assetId) => ipcRenderer.invoke('db:get-transactions-for-asset', assetId), // Example for later
+
+        // Example: Expose a function to show file open dialog via main process
+        // openFile: () => ipcRenderer.invoke('dialog:openFile')
+    });
+
+    console.log('electronAPI exposed to main world.');
