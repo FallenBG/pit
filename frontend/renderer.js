@@ -1,9 +1,8 @@
 // 5. renderer.js - React Frontend Code (runs in the Electron Renderer process)
-    // *** Includes IPC calls ***
+    // *** Includes IPC calls - UNFOLDED ***
 
     // --- Helper Functions ---
     const formatCurrency = (value, currency = 'USD') => {
-        // Handle cases where value might not be a number
         if (typeof value !== 'number' || isNaN(value)) return 'N/A';
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(value);
     };
@@ -32,12 +31,50 @@
     // --- Dashboard Components ---
     function PortfolioValue({ data }) {
       const { totalValue, baseCurrency, changes } = data;
-      return ( <div className="dashboard-card mb-6"> <h2 className="text-lg font-medium mb-2 text-gray-700">Portfolio Value</h2> <p className="text-3xl font-bold text-gray-900 mb-3">{formatCurrency(totalValue, baseCurrency)}</p> <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-sm"> {Object.entries(changes).map(([period, change]) => ( <div key={period}> <span className="text-gray-500 uppercase">{period}: </span> <span className={change.positive ? 'text-green-600' : 'text-red-600'}> {formatPercentage(change.value)} </span> </div> ))} </div> </div> );
+      return (
+        <div className="dashboard-card mb-6">
+          <h2 className="text-lg font-medium mb-2 text-gray-700">Portfolio Value</h2>
+          <p className="text-3xl font-bold text-gray-900 mb-3">{formatCurrency(totalValue, baseCurrency)}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-sm">
+            {Object.entries(changes).map(([period, change]) => (
+              <div key={period}>
+                <span className="text-gray-500 uppercase">{period}: </span>
+                <span className={change.positive ? 'text-green-600' : 'text-red-600'}>
+                  {formatPercentage(change.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
     }
     function GainersLosers({ data, onPeriodChange }) {
         const { period, gainers, losers } = data;
         const availablePeriods = ['Daily', 'WTD', 'MTD', 'YTD', 'Overall'];
-        return ( <div className="dashboard-card mb-6"> <div className="flex flex-wrap justify-between items-center mb-3 gap-2"> <h2 className="text-lg font-medium text-gray-700 whitespace-nowrap">Top Movers ({period})</h2> <div className="flex space-x-1 flex-shrink-0"> {availablePeriods.map(p => ( <button key={p} onClick={() => onPeriodChange(p)} className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-150 ${ period === p ? 'bg-blue-500 text-white shadow-sm ring-1 ring-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }`} > {p} </button> ))} </div> </div> <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> <div> <h3 className="text-md font-semibold mb-2 text-green-700">Top 5 Gainers</h3> <ul> {gainers.map(g => ( <li key={g.ticker} className="flex justify-between text-sm mb-1 py-1 border-b border-gray-100 last:border-b-0"> <span className="font-medium text-gray-800">{g.ticker}</span> <span className="text-green-600 font-medium">{formatPercentage(g.change)}</span> </li> ))} </ul> </div> <div> <h3 className="text-md font-semibold mb-2 text-red-700">Top 5 Losers</h3> <ul> {losers.map(l => ( <li key={l.ticker} className="flex justify-between text-sm mb-1 py-1 border-b border-gray-100 last:border-b-0"> <span className="font-medium text-gray-800">{l.ticker}</span> <span className="text-red-600 font-medium">{formatPercentage(l.change)}</span> </li> ))} </ul> </div> </div> </div> );
+        return (
+            <div className="dashboard-card mb-6">
+                <div className="flex flex-wrap justify-between items-center mb-3 gap-2">
+                    <h2 className="text-lg font-medium text-gray-700 whitespace-nowrap">Top Movers ({period})</h2>
+                    <div className="flex space-x-1 flex-shrink-0">
+                        {availablePeriods.map(p => (
+                            <button key={p} onClick={() => onPeriodChange(p)}
+                                className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-150 ${ period === p ? 'bg-blue-500 text-white shadow-sm ring-1 ring-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }`}
+                            > {p} </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 className="text-md font-semibold mb-2 text-green-700">Top 5 Gainers</h3>
+                        <ul> {gainers.map(g => ( <li key={g.ticker} className="flex justify-between text-sm mb-1 py-1 border-b border-gray-100 last:border-b-0"> <span className="font-medium text-gray-800">{g.ticker}</span> <span className="text-green-600 font-medium">{formatPercentage(g.change)}</span> </li> ))} </ul>
+                    </div>
+                    <div>
+                        <h3 className="text-md font-semibold mb-2 text-red-700">Top 5 Losers</h3>
+                        <ul> {losers.map(l => ( <li key={l.ticker} className="flex justify-between text-sm mb-1 py-1 border-b border-gray-100 last:border-b-0"> <span className="font-medium text-gray-800">{l.ticker}</span> <span className="text-red-600 font-medium">{formatPercentage(l.change)}</span> </li> ))} </ul>
+                    </div>
+                </div>
+            </div>
+        );
     }
     function AllocationChart({ data }) {
         const chartRef = React.useRef(null); const chartInstanceRef = React.useRef(null);
@@ -55,10 +92,7 @@
 
     // --- Holdings View Component ---
     function HoldingsView({ data, baseCurrency }) {
-        // Data fetching example (commented out, using props for now)
-        // const [holdings, setHoldings] = React.useState([]); ...
-        // React.useEffect(() => { ... await window.electronAPI.getAllAssets(); ... }, []);
-        const holdings = data; // Use props data
+        const holdings = data; // Using props data for now
         const holdingsWithCalculations = React.useMemo(() => holdings.map(holding => { const marketValue = (holding.quantity * holding.currentPrice) || 0; const costBasis = (holding.quantity * holding.avgCost) || 0; const gainLoss = marketValue - costBasis; const gainLossPercent = costBasis !== 0 ? (gainLoss / costBasis) * 100 : 0; const marketValueInBase = marketValue; const gainLossInBase = gainLoss; return { ...holding, marketValue: marketValueInBase, costBasis, gainLoss: gainLossInBase, gainLossPercent }; }), [holdings, baseCurrency]);
         return ( <div className="dashboard-card"> <h2 className="text-xl font-semibold mb-4 text-gray-800">Holdings</h2> <div className="overflow-x-auto"> <table className="min-w-full divide-y divide-gray-200 border border-gray-200"> <thead className="bg-gray-50"> <tr> <th>Asset</th><th>Quantity</th> <th className="text-right">Avg Cost</th><th className="text-right">Current Price</th> <th className="text-right">Market Value ({baseCurrency})</th><th className="text-right">Gain/Loss ({baseCurrency})</th> <th className="text-right">Gain/Loss (%)</th><th>Type</th> </tr> </thead> <tbody className="bg-white divide-y divide-gray-200"> {holdingsWithCalculations.length > 0 ? ( holdingsWithCalculations.map((holding) => ( <tr key={holding.id} className="hover:bg-gray-50"> <td> <div className="font-medium text-gray-900">{holding.ticker || holding.name}</div> {holding.ticker && holding.name !== holding.ticker && <div className="text-xs text-gray-500">{holding.name}</div>} </td> <td className="text-gray-700">{formatQuantity(holding.quantity)}</td> <td className="text-gray-700 text-right">{formatCurrency(holding.avgCost, holding.currency)}</td> <td className="text-gray-700 text-right">{formatCurrency(holding.currentPrice, holding.currency)}</td> <td className="text-gray-700 text-right">{formatCurrency(holding.marketValue, baseCurrency)}</td> <td className={`text-right ${holding.gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatCurrency(holding.gainLoss, baseCurrency)}</td> <td className={`text-right ${holding.gainLossPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatPercentage(holding.gainLossPercent)}</td> <td className="text-gray-700">{holding.assetType}</td> </tr> )) ) : ( <tr> <td colSpan="8" className="text-center text-gray-500 py-4">No holdings data available.</td> </tr> )} </tbody> </table> </div> </div> );
     }
@@ -66,10 +100,7 @@
 
     // --- Transactions View Component ---
     function TransactionsView({ data }) {
-        // Data fetching example (commented out, using props for now)
-        // const [transactions, setTransactions] = React.useState([]); ...
-        // React.useEffect(() => { ... await window.electronAPI.getAllTransactions(); ... }, []);
-        const transactions = data; // Use props data
+        const transactions = data; // Using props data for now
         const getTypeStyle = (type) => { switch (type.toLowerCase()) { case 'buy': return 'bg-green-100 text-green-800'; case 'sell': return 'bg-red-100 text-red-800'; case 'dividend': return 'bg-blue-100 text-blue-800'; case 'fee': return 'bg-yellow-100 text-yellow-800'; default: return 'bg-gray-100 text-gray-800'; } };
         const transactionsWithNetAmount = React.useMemo(() => transactions.map(tx => { let netAmount = 0; const quantity = tx.quantity || 0; const price = tx.price || 0; const fees = tx.fees || 0; switch (tx.type.toLowerCase()) { case 'buy': netAmount = -((quantity * price) + fees); break; case 'sell': netAmount = (quantity * price) - fees; break; case 'dividend': netAmount = (quantity * price) - fees; break; case 'fee': netAmount = -price; break; default: netAmount = 0; } return { ...tx, netAmount }; }).sort((a, b) => new Date(b.date) - new Date(a.date)), [transactions]);
         return ( <div className="dashboard-card"> <h2 className="text-xl font-semibold mb-4 text-gray-800">Transaction History</h2> <div className="overflow-x-auto"> <table className="min-w-full divide-y divide-gray-200 border border-gray-200"> <thead className="bg-gray-50"> <tr> <th>Date</th><th>Type</th><th>Asset</th> <th className="text-right">Quantity</th><th className="text-right">Price / Rate</th> <th className="text-right">Fees</th><th className="text-right">Net Amount</th> </tr> </thead> <tbody className="bg-white divide-y divide-gray-200"> {transactionsWithNetAmount.length > 0 ? ( transactionsWithNetAmount.map((tx) => ( <tr key={tx.id} className="hover:bg-gray-50"> <td className="text-gray-700">{formatDate(tx.date)}</td> <td><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getTypeStyle(tx.type)}`}>{tx.type}</span></td> <td> <div className="font-medium text-gray-900">{tx.ticker || tx.name}</div> {tx.ticker && tx.name !== tx.ticker && <div className="text-xs text-gray-500">{tx.name}</div>} </td> <td className="text-gray-700 text-right">{tx.quantity !== null ? formatQuantity(tx.quantity) : '-'}</td> <td className="text-gray-700 text-right">{formatCurrency(tx.price, tx.currency)}</td> <td className="text-gray-700 text-right">{formatCurrency(tx.fees, tx.currency)}</td> <td className={`font-medium text-right ${tx.netAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatCurrency(tx.netAmount, tx.currency)}</td> </tr> )) ) : ( <tr> <td colSpan="7" className="text-center text-gray-500 py-4">No transactions available.</td> </tr> )} </tbody> </table> </div> </div> );
@@ -108,7 +139,6 @@
     // --- Main App Component ---
     function App() {
       const [activeView, setActiveView] = React.useState('dashboard');
-
       // --- State for Dummy Data (Will be replaced by data fetched via IPC later) ---
       const [portfolioData, setPortfolioData] = React.useState({ totalValue: 125678.90, baseCurrency: 'USD', changes: { daily: { value: 0.5, positive: true }, wtd: { value: -1.2, positive: false }, mtd: { value: 3.0, positive: true }, ytd: { value: 15.5, positive: true }, overall: { value: 25.8, positive: true } } });
       const [moversData, setMoversData] = React.useState({ period: 'Daily', gainers: [ { ticker: "AAPL", change: 3.2 }, { ticker: "TSLA", change: 2.8 }, { ticker: "MSFT", change: 1.9 }, { ticker: "GOOGL", change: 1.5 }, { ticker: "AMZN", change: 1.1 } ], losers: [ { ticker: "NVDA", change: -2.5 }, { ticker: "META", change: -1.8 }, { ticker: "BTC-USD", change: -1.2 }, { ticker: "ETH-USD", change: -0.9 }, { ticker: "JPM", change: -0.5 } ] });
@@ -119,30 +149,13 @@
       // --- End State for Dummy Data ---
 
       // Function to handle period change for Movers
-      const handlePeriodChange = (newPeriod) => {
-          console.log("Changing period to:", newPeriod);
-          setMoversData(prevData => {
-              let newGainers = prevData.gainers; let newLosers = prevData.losers;
-              if (newPeriod === 'WTD') { newGainers = [ { ticker: "GOOGL", change: 1.8 }, { ticker: "JPM", change: 1.5 }, { ticker: "MSFT", change: 1.1 }, { ticker: "VUSA.L", change: 0.9 }, { ticker: "KO", change: 0.5 } ]; newLosers = [ { ticker: "TSLA", change: -3.1 }, { ticker: "AMZN", change: -2.4 }, { ticker: "NVDA", change: -1.9 }, { ticker: "BTC-USD", change: -1.5 }, { ticker: "META", change: -1.0 } ]; }
-              else if (newPeriod === 'Daily') { newGainers = [ { ticker: "AAPL", change: 3.2 }, { ticker: "TSLA", change: 2.8 }, { ticker: "MSFT", change: 1.9 }, { ticker: "GOOGL", change: 1.5 }, { ticker: "AMZN", change: 1.1 } ]; newLosers = [ { ticker: "NVDA", change: -2.5 }, { ticker: "META", change: -1.8 }, { ticker: "BTC-USD", change: -1.2 }, { ticker: "ETH-USD", change: -0.9 }, { ticker: "JPM", change: -0.5 } ]; }
-              return { ...prevData, period: newPeriod, gainers: newGainers.slice(0, 5), losers: newLosers.slice(0, 5) };
-          });
-      };
+      const handlePeriodChange = (newPeriod) => { console.log("Changing period to:", newPeriod); setMoversData(prevData => { let newGainers = prevData.gainers; let newLosers = prevData.losers; if (newPeriod === 'WTD') { newGainers = [ { ticker: "GOOGL", change: 1.8 }, { ticker: "JPM", change: 1.5 }, { ticker: "MSFT", change: 1.1 }, { ticker: "VUSA.L", change: 0.9 }, { ticker: "KO", change: 0.5 } ]; newLosers = [ { ticker: "TSLA", change: -3.1 }, { ticker: "AMZN", change: -2.4 }, { ticker: "NVDA", change: -1.9 }, { ticker: "BTC-USD", change: -1.5 }, { ticker: "META", change: -1.0 } ]; } else if (newPeriod === 'Daily') { newGainers = [ { ticker: "AAPL", change: 3.2 }, { ticker: "TSLA", change: 2.8 }, { ticker: "MSFT", change: 1.9 }, { ticker: "GOOGL", change: 1.5 }, { ticker: "AMZN", change: 1.1 } ]; newLosers = [ { ticker: "NVDA", change: -2.5 }, { ticker: "META", change: -1.8 }, { ticker: "BTC-USD", change: -1.2 }, { ticker: "ETH-USD", change: -0.9 }, { ticker: "JPM", change: -0.5 } ]; } return { ...prevData, period: newPeriod, gainers: newGainers.slice(0, 5), losers: newLosers.slice(0, 5) }; }); };
 
       // --- UI Structure ---
       return (
         <div className="flex flex-col h-full bg-gray-100">
           {/* Header/Navbar */}
-          <header className="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-10 border-b border-gray-200">
-            <h1 className="text-xl font-semibold text-gray-800">Personalized Investment Tracker (PIT)</h1>
-            <nav>
-                <button onClick={() => setActiveView('dashboard')} className={`px-4 py-2 rounded-md text-sm font-medium mr-2 transition-colors duration-150 ${activeView === 'dashboard' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Dashboard</button>
-                <button onClick={() => setActiveView('holdings')} className={`px-4 py-2 rounded-md text-sm font-medium mr-2 transition-colors duration-150 ${activeView === 'holdings' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Holdings</button>
-                <button onClick={() => setActiveView('transactions')} className={`px-4 py-2 rounded-md text-sm font-medium mr-2 transition-colors duration-150 ${activeView === 'transactions' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Transactions</button>
-                <button onClick={() => setActiveView('add_new')} className={`px-4 py-2 rounded-md text-sm font-medium mr-2 transition-colors duration-150 ${activeView === 'add_new' ? 'bg-green-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Add New</button>
-                <button onClick={() => setActiveView('settings')} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${activeView === 'settings' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Settings</button>
-            </nav>
-          </header>
+          <header className="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-10 border-b border-gray-200"> <h1 className="text-xl font-semibold text-gray-800">Personalized Investment Tracker (PIT)</h1> <nav> <button onClick={() => setActiveView('dashboard')} className={`px-4 py-2 rounded-md text-sm font-medium mr-2 transition-colors duration-150 ${activeView === 'dashboard' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Dashboard</button> <button onClick={() => setActiveView('holdings')} className={`px-4 py-2 rounded-md text-sm font-medium mr-2 transition-colors duration-150 ${activeView === 'holdings' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Holdings</button> <button onClick={() => setActiveView('transactions')} className={`px-4 py-2 rounded-md text-sm font-medium mr-2 transition-colors duration-150 ${activeView === 'transactions' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Transactions</button> <button onClick={() => setActiveView('add_new')} className={`px-4 py-2 rounded-md text-sm font-medium mr-2 transition-colors duration-150 ${activeView === 'add_new' ? 'bg-green-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Add New</button> <button onClick={() => setActiveView('settings')} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${activeView === 'settings' ? 'bg-blue-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Settings</button> </nav> </header>
 
           {/* Main Content Area */}
           <main className="flex-grow p-6 overflow-auto">
@@ -154,9 +167,7 @@
           </main>
 
           {/* Footer */}
-          <footer className="bg-gray-200 p-3 text-center text-sm text-gray-600 border-t border-gray-300">
-            Status: Ready | Base Currency: {portfolioData.baseCurrency} | Version: 1.0.0
-          </footer>
+          <footer className="bg-gray-200 p-3 text-center text-sm text-gray-600 border-t border-gray-300"> Status: Ready | Base Currency: {portfolioData.baseCurrency} | Version: 1.0.0 </footer>
         </div>
       );
     }
