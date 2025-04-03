@@ -1,0 +1,17 @@
+    # Python dependencies for Personalized Investment Tracker (PIT) Backend
+
+    # For reading/manipulating data, especially from Excel/CSV statements
+    pandas
+
+    # For extracting tables from PDF statements (Requires Java runtime)
+    tabula-py
+
+    # For making HTTP requests to external APIs (Market Data, FX, News)
+    requests
+
+    # Optional: For potential future database encryption (keep commented for now)
+    # sqlcipher-python-wheels
+
+    # Optional: For potential future Electron <-> Python bridge (keep commented for now)
+    # python-shell
+    

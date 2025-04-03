@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; object-src 'none';">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Personalized Investment Tracker</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+          tailwind.config = {
+            theme: {
+              extend: {
+                fontFamily: {
+                   sans: ['Inter', 'sans-serif'],
+                }
+              }
+            }
+          }
+        </script>
+        <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+        <style>
+            /* Basic body styling */
+            body {
+                font-family: 'Inter', sans-serif;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                background-color: #f9fafb;
+                color: #111827;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            #root {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            /* Refined card styling */
+            .dashboard-card {
+                @apply bg-white p-5 rounded-xl shadow-sm border border-gray-200;
+            }
+            /* Style for table header */
+            th {
+                @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+            }
+            /* Style for table cells */
+            td {
+                 @apply px-4 py-3 whitespace-nowrap text-sm;
+            }
+            /* Right align text in specific table cells */
+            td.text-right, th.text-right {
+                @apply text-right;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <script type="text/babel" src="renderer.js"></script>
+    </body>
+    </html>

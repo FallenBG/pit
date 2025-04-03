@@ -1,0 +1,24 @@
+{
+    "name": "personalized-investment-tracker",
+    "version": "1.0.0",
+    "description": "Personalized Investment Tracker Desktop App",
+    "main": "main.js",
+    "scripts": {
+      "start": "electron .",
+      "build": "echo 'Build script not implemented yet'"
+    },
+    "keywords": [
+      "investment",
+      "tracker",
+      "portfolio",
+      "electron",
+      "react"
+    ],
+    "author": "Your Name/Team",
+    "license": "MIT",
+    "devDependencies": {
+      "electron": "^29.0.0"
+    },
+    "dependencies": {
+    }
+  }
